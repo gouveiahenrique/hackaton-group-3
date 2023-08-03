@@ -5,20 +5,18 @@ import * as vscode from 'vscode';
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+	console.log('A extensão está ativa!');
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "group3-coderefine" is now active!');
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('group3-coderefine.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from CodeRefine!');
+	// Registrando um evento para observar alterações no texto
+	let disposable = vscode.workspace.onDidChangeTextDocument((e: vscode.TextDocumentChangeEvent) => {
+		e.document.save().then(() => {
+			console.log('Documento salvo após a edição:', e.document.fileName);
+		}, (error) => {
+			console.error('Erro ao salvar o documento:', error);
+		});
 	});
 
+	// Adicionando o disposable (descartável) ao contexto da extensão
 	context.subscriptions.push(disposable);
 }
 
