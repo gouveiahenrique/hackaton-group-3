@@ -1,83 +1,42 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.activate = void 0;
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 const vscode = require("vscode");
 const axios_1 = require("axios");
-// curl https://api.openai.com/v1/models \
-//   -H "Authorization: Bearer $OPENAI_API_KEY" \
-//   -H "OpenAI-Organization: org-KcWez7sJyjWKXELAwstc4Kh4"
-const API_KEY = '';
-const API_URL = 'https://api.openai.com/v1/chat/completions';
-const config = {
-    headers: {
-        'Content-Type': 'application/json',
-        // Se você precisa de um token de autenticação, inclua aqui
-        'Authorization': 'Bearer '
-    }
+const endpoint = "https://api.openai.com/v1/chat/completions";
+const headers = {
+    "Content-Type": "application/json",
+    Authorization: "Bearer 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",
 };
-// function getBearerToken(): string {
-// 	axios.post('https://api.openai.com/v1/token',{
-// 		grant_type: 'client_credentials',
-// 		api_key: API_KEY
-// 	},
-// 	{
-// 		headers: {
-// 			'Content-Type': 'application/json'
-// 		}
-// 	}
-// 	).then(response => { 
-// 		console.error('Success:', response.data.access_token);
-// 		return response.data.access_token;
-// 	}).catch(error => {
-// 		console.error('Erro na obtenção do Bearer Token:', error);
-// 	});
-// 	return "";
-// }
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+const model = "gpt-3.5-turbo";
+const temperature = 0.6;
 function activate(context) {
-    // Registrando um evento para observar alterações no texto
-    let disposable = vscode.workspace.onDidChangeTextDocument((e) => {
-        const { document, contentChanges } = e;
-        const text = document.getText();
-        if (text.length > 15) {
-            execute(text);
-        }
+    let disposable = vscode.workspace.onDidSaveTextDocument((e) => {
+        const text = e.getText();
+        execute(text);
     });
-    // Adicionando o disposable (descartável) ao contexto da extensão
     context.subscriptions.push(disposable);
 }
 exports.activate = activate;
 async function execute(text) {
-    // Simulação: obtendo sugestões de melhorias do ChatGPT
     const prompt = "Atue como um desenvolvedor de software e gere sugestões de melhorias para o código abaixo:\n\n" + text;
-    const suggestion = getChatGPTSuggestion(prompt);
-    // Exibir a sugestão na tela do usuário da extensão
-    vscode.window.showInformationMessage(suggestion);
+    getSuggestion(prompt);
 }
-function getChatGPTSuggestion(prompt) {
-    const requestData = {
-        model: "text-davinci-003",
-        prompt: prompt,
-        max_tokens: 10,
-        temperature: 0.5
-    };
-    axios_1.default.post(API_URL, requestData, config)
-        .then(response => {
-        // Trate a resposta da API da OpenAI aqui
-        console.log('Resposta da API:', response.data);
-        return response.data;
-    })
-        .catch(error => {
-        // Trate os erros aqui
-        console.error('Erro na requisição:', error);
-        return "";
-    });
-    return "";
+async function getSuggestion(prompt) {
+    try {
+        const response = await axios_1.default.post(endpoint, {
+            model: model,
+            messages: [{ role: "user", content: prompt }],
+            temperature: temperature,
+        }, { headers: headers });
+        vscode.window.showInformationMessage("Resposta do ChatGPT: " +
+            JSON.stringify(response.data.choices[0].message.content));
+    }
+    catch (error) {
+        vscode.window.showErrorMessage("Erro ao enviar a mensagem para o ChatGPT.");
+        console.error(error);
+    }
 }
-// This method is called when your extension is deactivated
 function deactivate() { }
 exports.deactivate = deactivate;
 //# sourceMappingURL=extension.js.map
