@@ -4,7 +4,7 @@ import axios from 'axios';
 const endpoint = "https://api.openai.com/v1/chat/completions";
 const headers = {
 	"Content-Type": "application/json",
-	Authorization: "Bearer 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",
+	Authorization: "Bearer ",
 };
 const model = "gpt-3.5-turbo";
 const temperature = 0.6;
